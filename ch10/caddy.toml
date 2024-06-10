@@ -1,0 +1,35 @@
+[apps.http.servers.test_server]
+listen = [
+    'localhost:2020',
+]
+
+[[apps.http.servers.test_server.routes]]
+# matcher : 특정 조건을 만족하는 클라이언트의 요청을 탐색하는 특별한 모듈
+[[apps.http.servers.test_server.routes.match]]
+path = [
+    '/backend',
+    '/backend/*',
+]
+[[apps.http.servers.test_server.routes.handle]]
+# 일치하는 모든 요청을 reverse proxy 핸들러에게 전달하도록 함
+handler = 'reverse_proxy'
+# 어디로 전송을 보낼지 정보 입력
+[[apps.http.servers.test_server.routes.handle.upstreams]]
+dial = 'localhost:8080'
+
+[[apps.http.servers.test_server.routes]]
+# matcher 포함 X
+# Caddy는 이전 라우트와 일치하지 않는 모든 요청을 지금의 라우트로 전달
+# 이 라우트가 기본 라우트가 됨
+# 환경구성 설정 파일 내의 순서가 중요함
+[[apps.http.servers.test_server.routes.handle]]
+handler = 'restrict_prefix'
+prefix = '.'
+[[apps.http.servers.test_server.routes.handle]]
+handler = 'file_server'
+root = './files'
+# 아무런 파일이 요청되지 않는 경우
+# 기본적으로 index.html 파일을 반환하도록 설정
+index_names = [
+    'index.html',
+]
