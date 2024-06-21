@@ -9,9 +9,13 @@ import (
 )
 
 type Rosie struct {
-	mu     sync.Mutex
+	// 하나 이상의 클라이언트가 동시에 서비스를 사용할 수 있도록, 뮤텍스를 사용해 동시 접근을 보호
+	mu sync.Mutex
+	// 메모리상에 집안일 목록을 저장
 	chores []*housework.Chore
 }
+
+// Add, Complete, List 메서드는 모두 클라이언트에게 전달되는 응답 메시지 혹은 에러를 반환
 
 func (r *Rosie) Add(_ context.Context, chores *housework.Chores) (
 	*housework.Response, error) {
@@ -49,6 +53,7 @@ func (r *Rosie) List(_ context.Context, _ *housework.Empty) (
 	return &housework.Chores{Chores: r.chores}, nil
 }
 
+// Rosie의 Add, Complete, List 메서드를 포함하는 새로운 housework.RobotMaidService 인스턴스의 포인터를 반환
 func (r *Rosie) Service() *housework.RobotMaidService {
 	return &housework.RobotMaidService{
 		Add:      r.Add,
